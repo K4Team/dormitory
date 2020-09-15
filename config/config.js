@@ -55,12 +55,6 @@ export default defineConfig({
               component: './Welcome',
             },
             {
-              name: '人员管理',
-              icon: 'smile',
-              path: '/person',
-              component: './Person',
-            },
-            {
               component: './404',
             },
           ],

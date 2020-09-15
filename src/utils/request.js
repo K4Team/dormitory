@@ -3,7 +3,13 @@
  * 更详细的 api 文档: https://github.com/umijs/umi-request
  */
 import { extend } from 'umi-request';
-import { notification } from 'antd';
+import { Modal, notification } from 'antd';
+import { history } from 'umi';
+import { getToken } from '@/utils/authority';
+import { getPageQuery } from '@/utils/utils';
+// import { stringify } from 'qs';
+import { urlAPI } from '../../config/urlConfig';
+
 const codeMessage = {
   200: '服务器成功返回请求的数据。',
   201: '新建或修改数据成功。',
@@ -24,6 +30,26 @@ const codeMessage = {
 /**
  * 异常处理程序
  */
+const showDialog = () => {
+  Modal.warning({
+    title: '系统提示',
+    content: '会话超时，请重新登录！',
+    keyboard: false,
+    onOk() {
+      const { redirect } = getPageQuery(); // redirect
+      Modal.destroyAll();
+      if (window.location.pathname !== '/login' && !redirect) {
+        history.push('/login');
+        // history.push({
+        //   pathname: '/login',
+        //   search: stringify({
+        //     redirect: window.location.href,
+        //   }),
+        // });
+      }
+    },
+  });
+};
 
 const errorHandler = (error) => {
   const { response } = error;
@@ -47,10 +73,37 @@ const errorHandler = (error) => {
 /**
  * 配置request请求时的默认参数
  */
-
 const request = extend({
+  prefix: urlAPI,
   errorHandler,
   // 默认错误处理
   credentials: 'include', // 默认请求是否带上cookie
 });
+// request拦截器, 改变url 或 options.
+request.interceptors.request.use((url, options) => {
+  const { code } = options;
+  // 不拦截登录请求
+  if (url.includes('/login')) {
+    return { url, options };
+  }
+  const token = getToken();
+  if (!token) {
+    showDialog();
+    return { url, options };
+  }
+  return {
+    url,
+    options: {
+      ...options,
+      params: {
+        ...options.params,
+      },
+      headers: {
+        unique_token: token,
+        'resource-code': code,
+      },
+    },
+  };
+});
+
 export default request;

@@ -4,14 +4,15 @@
  * https://github.com/ant-design/ant-design-pro-layout
  */
 import ProLayout, { DefaultFooter } from '@ant-design/pro-layout';
-import React, { useEffect } from 'react';
-import { Link, useIntl, connect, history } from 'umi';
+import React from 'react';
+import { Link, useIntl, history } from 'umi';
 import { GithubOutlined } from '@ant-design/icons';
 import { Result, Button } from 'antd';
 import Authorized from '@/utils/Authorized';
 import RightContent from '@/components/GlobalHeader/RightContent';
 import { getAuthorityFromRouter } from '@/utils/utils';
 import logo from '../assets/logo.svg';
+
 const noMatch = (
   <Result
     status={403}
@@ -76,13 +77,6 @@ const BasicLayout = (props) => {
    * constructor
    */
 
-  useEffect(() => {
-    if (dispatch) {
-      dispatch({
-        type: 'user/fetchCurrent',
-      });
-    }
-  }, []);
   /**
    * init variables
    */
@@ -143,7 +137,4 @@ const BasicLayout = (props) => {
   );
 };
 
-export default connect(({ global, settings }) => ({
-  collapsed: global.collapsed,
-  settings,
-}))(BasicLayout);
+export default BasicLayout;

@@ -31,3 +31,17 @@ export function setAuthority(authority) {
 
   reloadAuthorized();
 }
+
+export function getToken() {
+  return localStorage.getItem('HUJX-TOKEN') || null;
+}
+export function setToken(token) {
+  return localStorage.setItem('HUJX-TOKEN', token);
+}
+
+export function getCurrentUser() {
+  return JSON.parse(localStorage.getItem('CURRENT-USER')) || null;
+}
+export function setCurrentUser(user) {
+  return localStorage.setItem('CURRENT-USER', JSON.stringify(user));
+}

@@ -1,8 +1,10 @@
-import { AlipayCircleOutlined, TaobaoCircleOutlined, WeiboCircleOutlined } from '@ant-design/icons';
-import { Alert, Checkbox } from 'antd';
+import { Alert, Checkbox, message } from 'antd';
 import React, { useState } from 'react';
-import { Link, connect } from 'umi';
+import { Link, history } from 'umi';
+import { login } from '@/services/login';
 import LoginForm from './components/Login';
+import { setToken, setCurrentUser } from '@/utils/authority';
+
 import styles from './style.less';
 
 const { Tab, UserName, Password, Mobile, Captcha, Submit } = LoginForm;
@@ -25,10 +27,16 @@ const Login = (props) => {
   const [type, setType] = useState('account');
 
   const handleSubmit = (values) => {
-    const { dispatch } = props;
-    dispatch({
-      type: 'login/login',
-      payload: { ...values, type },
+    login({ mobile: values.mobile, password: values.password }).then((res) => {
+      console.log(res);
+      if (res.code === 200) {
+        message.success('登陆成功！');
+        setToken(res.token);
+        setCurrentUser(res.data);
+        history.push('/welcome');
+      } else {
+        message.error('登录失败！');
+      }
     });
   };
 
@@ -41,12 +49,12 @@ const Login = (props) => {
           )}
 
           <UserName
-            name="userName"
-            placeholder="用户名: admin or user"
+            name="mobile"
+            placeholder="手机号: admin or user"
             rules={[
               {
                 required: true,
-                message: '请输入用户名!',
+                message: '请输入手机号!',
               },
             ]}
           />
@@ -97,34 +105,29 @@ const Login = (props) => {
           <Checkbox checked={autoLogin} onChange={(e) => setAutoLogin(e.target.checked)}>
             自动登录
           </Checkbox>
-          <Link style={{
-            float: 'right',
-          }} className={styles.register} to="/user/register">
+          <Link
+            style={{
+              float: 'right',
+            }}
+            className={styles.register}
+            to="/user/register"
+          >
             注册账户
           </Link>
 
           <a
             style={{
               float: 'right',
-              marginRight:10
+              marginRight: 10,
             }}
           >
             忘记密码
           </a>
         </div>
         <Submit loading={submitting}>登录</Submit>
-        {/*<div className={styles.other}>*/}
-        {/*  /!*其他登录方式*!/*/}
-        {/*  /!*<AlipayCircleOutlined className={styles.icon} />*!/*/}
-        {/*  /!*<TaobaoCircleOutlined className={styles.icon} />*!/*/}
-        {/*  /!*<WeiboCircleOutlined className={styles.icon} />*!/*/}
-        {/*</div>*/}
       </LoginForm>
     </div>
   );
 };
 
-export default connect(({ login, loading }) => ({
-  userLogin: login,
-  submitting: loading.effects['login/login'],
-}))(Login);
+export default Login;
